@@ -2,8 +2,8 @@ package edu.cs.birzeit.assignment2_android.LoginRegister;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -35,11 +35,36 @@ public class LoginActivity extends AppCompatActivity {
         Login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                btnLoginOnClick(view);
+                String email = ed_email.getText().toString().trim();
+                String password = ed_password.getText().toString();
+
+                if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+                    Toast.makeText(LoginActivity.this, "Please fill in both email and password", Toast.LENGTH_SHORT).show();
+                    return; // Return early if email or password is empty
+                }
+
+                if (chkRememberPassword.isChecked() && !preferencesManager.isRegistered()) {
+                    preferencesManager.getEditor().putString(UserPreferencesManager.EMAIL, email);
+                    preferencesManager.getEditor().putString(UserPreferencesManager.PASSWORD, password);
+                    preferencesManager.getEditor().putBoolean(UserPreferencesManager.FLAG, true);
+                    preferencesManager.getEditor().apply();
+                }
+
+                // Check for registration status after a short delay
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (preferencesManager.isRegistered()) {
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            startActivity(intent);
+                        } else {
+                            Toast.makeText(LoginActivity.this, "Incorrect credentials or user not registered", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }, 1000);
             }
         });
     }
-
 
     private void checkPrefs() {
         flag = preferencesManager.getLoginState();
@@ -60,33 +85,4 @@ public class LoginActivity extends AppCompatActivity {
         chkRememberPassword = findViewById(R.id.chkRememberPassword);
         Login = findViewById(R.id.btn_login);
     }
-
-    public void btnLoginOnClick(View view) {
-        String email = ed_email.getText().toString().trim();
-        String password = ed_password.getText().toString();
-
-        if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-            Toast.makeText(LoginActivity.this, "Please fill in both email and password", Toast.LENGTH_SHORT).show();
-        } else {
-            // Save preferences only if "Remember Password" is checked and the user is not registered
-            if (chkRememberPassword.isChecked() && !preferencesManager.isRegistered()) {
-                preferencesManager.getEditor().putString(UserPreferencesManager.EMAIL, email);
-                preferencesManager.getEditor().putString(UserPreferencesManager.PASSWORD, password);
-                preferencesManager.getEditor().putBoolean(UserPreferencesManager.FLAG, true);
-                preferencesManager.getEditor().apply();
-            }
-
-            // Check if the entered credentials match the registered user
-            if (preferencesManager.isRegistered()) {
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(intent);
-            } else {
-                // Incorrect credentials or user not registered
-                Toast.makeText(LoginActivity.this, "Incorrect credentials or user not registered", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-
-
 }

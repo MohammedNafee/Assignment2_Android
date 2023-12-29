@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import edu.cs.birzeit.assignment2_android.R;
@@ -27,7 +29,15 @@ public class RegisterActivity extends AppCompatActivity {
         preferencesManager = UserPreferencesManager.getInstance(this);
 
         setupViews();
-        btnRegisterOnClick(btn_register);
+        btn_register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                btnRegisterOnClick(view);
+                Toast.makeText(RegisterActivity.this, "Register successfully!", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
     }
 
 
@@ -50,7 +60,5 @@ public class RegisterActivity extends AppCompatActivity {
 
         preferencesManager.setRegistered(true);
 
-
     }
-
 }
