@@ -12,6 +12,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         lstTitles = findViewById(R.id.lstTitles);
     }
 
-    public void btn_OnClick(View view) {
+    public void btn1_OnClick(View view) {
 
         String url = "https://poetrydb.org/author,title/Shakespeare;Sonnet";
 
@@ -65,4 +66,46 @@ public class MainActivity extends AppCompatActivity {
 
         queue.add(request);
     }
+
+    public void btn2_OnClick(View view) {
+
+        String url = "https://poetrydb.org/author";
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url,
+                null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                ArrayList<String> authors = new ArrayList<>();
+                try {
+                    // Check if the response contains the "authors" key
+                    if (response.has("authors")) {
+                        JSONArray authorsArray = response.getJSONArray("authors");
+
+                        // Iterate through the authors array
+                        for (int i = 0; i < authorsArray.length(); i++) {
+                            authors.add(authorsArray.getString(i));
+                        }
+
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this,
+                                android.R.layout.simple_list_item_1, authors);
+                        lstTitles.setAdapter(adapter);
+                    } else {
+                        Log.d("volley_error", "Response does not contain 'authors' key");
+                    }
+
+                } catch (JSONException exception) {
+                    Log.d("volley_error", exception.toString());
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("volley_error", error.toString());
+            }
+        });
+
+        queue.add(request);
+    }
+
+
 }
